@@ -12,7 +12,6 @@ For the robot, I used two data sets:
 -Marketing data from Google Ads and Facebook Ads campaigns, including information on costs, ROMI, reach, duration of impressions, and campaign effectiveness.
 <details>
 <summary>Task 1</summary>
- ---
   `with ads as (
 select ad_date
       , 'Facebook' as media_source
@@ -29,7 +28,6 @@ select ad_date
      , ROUND(AVG(spend),2) as avg_spend, ROUND(MAX(spend),2) as max_spend, ROUND(MIN(spend),2) as min_spend
   from ads
  group by ad_date, media_source`
- ---
 </details>
 -GA4 behavioral data, which included information about user devices, geography, event types, traffic sources, and conversion actions.
 
