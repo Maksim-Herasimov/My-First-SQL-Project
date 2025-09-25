@@ -18,14 +18,20 @@ Data processing was performed in PostgreSQL and BigQuery using SQL queries for a
 Key tasks and analytics
  -Aggregations were performed to calculate average, minimum, and maximum costs, as well as ROMI by date.
 
-   ##[Task 1.1](./Task_1.1.sql)
-   ##[Task 1.2](./Task_1.2.sql)
-   ##[Task 1.3](./Task_1.3.sql)
-   ##[Task 1.4](./Task_1.4.sql)
-   ##[Task 1.5](./Task_1.5.sql)
+   :white_check_mark:[PostgreSQL Task 1.1](./Task_1.1.sql) </p>
+   :white_check_mark:[PostgreSQL Task 1.2](./Task_1.2.sql)</p>
+   :white_check_mark:[PostgreSQL Task 1.3](./Task_1.3.sql)</p>
+   :white_check_mark:[PostgreSQL Task 1.4](./Task_1.4.sql)</p>
+   :white_check_mark:[PostgreSQL Task 1.5](./Task_1.5.sql)</p>
  
  -A comparison was made of the effectiveness of campaigns in terms of coverage, duration of impressions, and value to the company.
  
  -For behavioral data, a conversion funnel was constructed from the start of the session to the purchase.
+
+ :white_check_mark:[BigQuery Task 2](./Task_2.sql)
+
+ :white_check_mark:[BigQuery Task 3](./Task_3.sql)
+
+  :white_check_mark:[BigQuery Task 4](./Task_4.sql)
  
  -The structure of the queries was modular: first, basic samples were formed, then metrics were calculated, and finally, data was prepared for visualization.
