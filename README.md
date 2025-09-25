@@ -12,7 +12,7 @@ For the robot, I used two data sets:
 -Marketing data from Google Ads and Facebook Ads campaigns, including information on costs, ROMI, reach, duration of impressions, and campaign effectiveness.
 <details>
 <summary>Task 1</summary>
-  [task_1_1](.My-First-SQL-Project/Task_1.1)
+  [task_1_1](.My-First-SQL-Project/Task_1.1.sql)
 </details>
 -GA4 behavioral data, which included information about user devices, geography, event types, traffic sources, and conversion actions.
 
