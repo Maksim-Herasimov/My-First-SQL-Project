@@ -10,10 +10,10 @@
 For the robot, I used two data sets:
 
 -Marketing data from Google Ads and Facebook Ads campaigns, including information on costs, ROMI, reach, duration of impressions, and campaign effectiveness.
-<details>
-<summary>Task 1</summary>
+
   [task_1_1](./Task_1.1.sql)
-</details>
+ 
+  
 -GA4 behavioral data, which included information about user devices, geography, event types, traffic sources, and conversion actions.
 
 Data processing was performed in PostgreSQL and BigQuery using SQL queries for aggregations, filtering, metric calculations, and intermediate table construction.
