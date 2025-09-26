@@ -343,3 +343,44 @@ ORDER BY
 </details>
 
 :heavy_minus_sign:The structure of the queries was modular: first, basic samples were formed, then metrics were calculated, and finally, data was prepared for visualization.
+
+![Visualization based on Google Ads and Facebook Ads data](./Visualization/PostgreSQL.png)
+*Visualization based on Google Ads and Facebook Ads data*
+
+
+![Visualization based on Google Analytics 4 in BigQuery](./Visualization/BigQuery.png)
+*Visualization based on Google Analytics 4 in BigQuery*
+
+ ## :hammer:Technical expertise
+ 
+:bar_chart:Built 2 interactive dashboards from different sources (marketing + GA4 behavioral data)
+
+:wrench:Used SQL  for preparing, aggregating and optimizing queries
+
+:art:Implemented Looker Studio for visualization, filtering, and structured presentation of results
+
+## :bulb:Key insights
+
+:computer:Desktop is the main channel (>65K users), the mobile segment is also significant (~40K)
+
+:earth_asia:Main markets: North America, Europe, Asia
+
+:chart_with_upwards_trend:The days with the highest ROMI and the campaigns with the highest reach are identified
+
+:dollar: In the conversion funnel - sagging from add_to_cart to purchase
+
+## :rocket: Practical value
+
+:heavy_minus_sign:Optimization of advertising budgets based on ROMI
+
+:heavy_minus_sign:Improving UX for desktop and mobile devices
+
+:heavy_minus_sign:Removing barriers in the checkout process
+
+:heavy_minus_sign:Setting up correct channel tracking
+
+## :pushpin: Professional results
+
+:heavy_minus_sign:Full cycle of work with data: collection → preparation → visualization → business decisions
+
+:heavy_minus_sign:Focus on analytical accuracy, visual clarity and business value</a>
