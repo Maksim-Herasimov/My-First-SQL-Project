@@ -9,14 +9,17 @@
  
 For the robot, I used two data sets:
 
--Marketing data from Google Ads and Facebook Ads campaigns, including information on costs, ROMI, reach, duration of impressions, and campaign effectiveness.
+:heavy_minus_sign:Marketing data from Google Ads and Facebook Ads campaigns, including information on costs, ROMI, reach, duration of impressions, and campaign effectiveness.
   
--GA4 behavioral data, which included information about user devices, geography, event types, traffic sources, and conversion actions.
+:heavy_minus_sign:GA4 behavioral data, which included information about user devices, geography, event types, traffic sources, and conversion actions.
 
 Data processing was performed in PostgreSQL and BigQuery using SQL queries for aggregations, filtering, metric calculations, and intermediate table construction.
 
 Key tasks and analytics
- -Aggregations were performed to calculate average, minimum, and maximum costs, as well as ROMI by date.
+ 
+ :heavy_minus_sign:Aggregations were performed to calculate average, minimum, and maximum costs, as well as ROMI by date.
+ 
+ :heavy_minus_sign:A comparison was made of the effectiveness of campaigns in terms of coverage, duration of impressions, and value to the company.
 
 <details>
 <summary>Query 1.1 PostgeSQL</summary>
@@ -193,14 +196,150 @@ order by duration_days desc
 LIMIT 1;
 ```
 </details>
- -A comparison was made of the effectiveness of campaigns in terms of coverage, duration of impressions, and value to the company.
  
- -For behavioral data, a conversion funnel was constructed from the start of the session to the purchase.
+:heavy_minus_sign:For behavioral data, a conversion funnel was constructed from the start of the session to the purchase.
 
- :white_check_mark:[BigQuery Task 2](./Task_2.sql)
-
- :white_check_mark:[BigQuery Task 3](./Task_3.sql)
-
-  :white_check_mark:[BigQuery Task 4](./Task_4.sql)
+<details>
+ <summary>Query 2 BigQuery</summary>
  
- -The structure of the queries was modular: first, basic samples were formed, then metrics were calculated, and finally, data was prepared for visualization.
+```bash
+SELECT TIMESTAMP_MICROS(event_timestamp) AS event_timestamp
+     , user_pseudo_id
+     , (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') as ga_session_id
+     , event_name
+     , geo.country
+     , device. category as device_cetegory
+     , traffic_source. source
+     , traffic_source. medium
+     , traffic_source. name
+  FROM `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*` 
+ WHERE event_name IN (
+    'session_start',
+    'view_item',
+    'add_to_cart',
+    'begin_checkout',
+    'add_shipping_info',
+    'add_payment_info',
+    'purchase') AND _TABLE_SUFFIX BETWEEN '20210101' AND '20211231'
+ LIMIT 100;
+ ```
+</details>
+
+<details>
+<summary>Query 3 BigQuery</summary>
+ 
+```bash
+WITH base_events AS (
+  SELECT
+    DATE(TIMESTAMP_MICROS(event_timestamp)) AS event_date,
+    user_pseudo_id,
+    -- Витягуємо session_id з event_params
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS session_id,
+    event_name,
+    traffic_source.name AS campaign,
+    traffic_source.medium AS medium,
+    traffic_source.source AS source
+  FROM
+    `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
+  WHERE
+    event_name IN (
+      'session_start',
+      'add_to_cart',
+      'begin_checkout',
+      'purchase'
+    )
+     GROUP BY
+    event_date, source, medium, campaign, user_pseudo_id, session_id, event_name
+),
+session_flags AS (
+  SELECT
+    event_date,
+    source,
+    medium,
+    campaign,
+    event_name,
+    CONCAT(CAST(user_pseudo_id AS STRING), '-', CAST(session_id AS STRING)) AS user_session_id,
+  FROM
+    base_events
+  WHERE
+    session_id IS NOT NULL
+  GROUP BY
+    event_date, source, medium, campaign,  event_name, user_session_id
+)
+SELECT
+  event_date,
+  source,
+  medium,
+  campaign,
+  count(distinct user_session_id) as user_sessions_count,
+  count(distinct case when event_name = 'add_to_cart' then user_session_id end) as visit_to_cart,
+  count(distinct case when event_name = 'begin_checkout' then user_session_id end) as visit_to_checkout,
+  count(distinct case when event_name = 'purchase' then user_session_id end) as visit_to_purchase,
+FROM
+  session_flags
+GROUP BY
+  event_date, source, medium, campaign
+ORDER BY
+  event_date, source, medium, campaign
+```
+</details>
+
+ <details>
+ <summary>Query 4 BigQuery</summary>
+
+  ```bash
+WITH session_start_events AS (
+  SELECT
+    user_pseudo_id,
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS session_id,
+    -- Витягуємо page_path з page_location
+    REGEXP_EXTRACT(
+      (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'),
+      r'^https?://[^/]+(/[^?#]*)'
+    ) AS page_path
+  FROM `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
+  WHERE
+    _TABLE_SUFFIX BETWEEN '20200101' AND '20201231'
+    AND event_name = 'session_start'
+),
+purchase_events AS (
+  SELECT
+    user_pseudo_id,
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS session_id
+  FROM
+    `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
+  WHERE
+    _TABLE_SUFFIX BETWEEN '20200101' AND '20201231'
+    AND event_name = 'purchase'
+),
+joined_sessions AS (
+  SELECT
+    s.page_path,
+    s.user_pseudo_id,
+    s.session_id,
+    IF(p.session_id IS NOT NULL, 1, 0) AS has_purchase
+  FROM
+    session_start_events s
+  LEFT JOIN
+    purchase_events p
+  ON
+    s.user_pseudo_id = p.user_pseudo_id
+    AND s.session_id = p.session_id
+  WHERE
+    s.session_id IS NOT NULL
+)
+SELECT
+  page_path,
+  COUNT(DISTINCT CONCAT(user_pseudo_id, '-', session_id)) AS unique_sessions,
+  COUNTIF(has_purchase = 1) AS purchases,
+  SAFE_DIVIDE(COUNTIF(has_purchase = 1), COUNT(DISTINCT CONCAT(user_pseudo_id, '-', session_id))) AS conversion_rate
+FROM
+  joined_sessions
+GROUP BY
+  page_path
+ORDER BY
+  unique_sessions DESC
+```
+</details>
+
+:heavy_minus_sign:The structure of the queries was modular: first, basic samples were formed, then metrics were calculated, and finally, data was prepared for visualization.
